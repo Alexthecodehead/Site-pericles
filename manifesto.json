@@ -1,0 +1,81 @@
+{
+  "url_original": "https://raioxcarol.site.benvox.ai/",
+  "recursos": {
+    "https://app.benvox.ai/widget.js": {
+      "path": "assets/app.benvox.ai/widget-872d71ade5.js",
+      "mime": "text/javascript",
+      "size": 17341
+    },
+    "https://connect.facebook.net/en_US/fbevents.js": {
+      "path": "assets/connect.facebook.net/en_US/fbevents-c5acbaebd7.js",
+      "mime": "application/x-javascript",
+      "size": 433362
+    },
+    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Public+Sans:wght@400;500;600;700;800&display=swap": {
+      "path": "assets/fonts.googleapis.com/css2-7173c0e3ca.css",
+      "mime": "text/css",
+      "size": 13086
+    },
+    "https://files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/a2/a22512dac53800f21df907ec50b45fcb3b7c98956eac8033985d6f09f45f9ea4?response-content-type=image%2Fjpeg": {
+      "path": "assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/a2/a22512dac53800f21df907ec50b45fcb3b7c98956eac8033985d6f09f45f9ea4-39472726ef.jpg",
+      "mime": "image/jpeg",
+      "size": 177447
+    },
+    "https://connect.facebook.net/signals/config/123303341551617?v=2.9.441&r=stable&domain=raioxcarol.site.benvox.ai&hme=abf59d235177e3601acac6035d7c2a28fadbda4b0c64009bc203ceed9fa8bb90&ex_m=119%2C243%2C172%2C27%2C82%2C83%2C163%2C78%2C77%2C11%2C182%2C102%2C20%2C154%2C142%2C46%2C85%2C90%2C184%2C111%2C150%2C177%2C8%2C4%2C5%2C7%2C6%2C3%2C103%2C116%2C162%2C72%2C186%2C110%2C185%2C212%2C264%2C37%2C84%2C284%2C283%2C282%2C14%2C25%2C28%2C40%2C62%2C118%2C68%2C10%2C73%2C112%2C113%2C114%2C120%2C145%2C38%2C36%2C147%2C148%2C149%2C144%2C143%2C173%2C86%2C176%2C174%2C175%2C57%2C69%2C67%2C138%2C19%2C180%2C52%2C335%2C336%2C337%2C334%2C32%2C17%2C31%2C18%2C33%2C34%2C35%2C55%2C164%2C87%2C127%2C22%2C24%2C51%2C47%2C49%2C48%2C95%2C104%2C108%2C125%2C161%2C165%2C53%2C126%2C29%2C26%2C134%2C79%2C43%2C167%2C166%2C168%2C158%2C156%2C30%2C42%2C66%2C124%2C179%2C80%2C21%2C129%2C93%2C76%2C23%2C97%2C98%2C131%2C96%2C152%2C151%2C155%2C109%2C178%2C181%2C41%2C351%2C353%2C374%2C257%2C239%2C70%2C240%2C238%2C377%2C368%2C59%2C258%2C122%2C146%2C92%2C136%2C61%2C54%2C56%2C128%2C135%2C141%2C140%2C65%2C74%2C169%2C88%2C89%2C130%2C44%2C39%2C60%2C63%2C115%2C183%2C1%2C139%2C16%2C137%2C12%2C2%2C64%2C105%2C15%2C75%2C71%2C133%2C101%2C100%2C188%2C189%2C106%2C107%2C9%2C117%2C187%2C58%2C159%2C99%2C91%2C81%2C132%2C121%2C170%2C50%2C160%2C0%2C94%2C153%2C157%2C171%2C45%2C123%2C13%2C190": {
+      "path": "assets/connect.facebook.net/signals/config/123303341551617-9d7d382da9.js",
+      "mime": "application/x-javascript",
+      "size": 689909
+    },
+    "https://fonts.gstatic.com/s/publicsans/v21/ijwRs572Xtc6ZYQws9YVwnNGfJ4.woff2": {
+      "path": "assets/fonts.gstatic.com/s/publicsans/v21/ijwRs572Xtc6ZYQws9YVwnNGfJ4-9f34cd9981.woff2",
+      "mime": "font/woff2",
+      "size": 26832
+    },
+    "https://app.benvox.ai/v3/public/site/carol_almeida_26d075/logo": {
+      "path": "assets/app.benvox.ai/v3/public/site/carol_almeida_26d075/logo-57529ef286.png",
+      "mime": "image/png",
+      "size": 24243
+    },
+    "https://app.benvox.ai/v3/public/chat/chat-do-site-2b5538": {
+      "path": "assets/app.benvox.ai/v3/public/chat/chat-do-site-2b5538-7a9bd18342.json",
+      "mime": "application/json",
+      "size": 343
+    },
+    "https://fonts.gstatic.com/s/fraunces/v38/6NU58FyLNQOQZAnv9ZwNjucMHVn85Ni7emAe9lKqZTnbB-gzTK0K1ChjeveQ.woff2": {
+      "path": "assets/fonts.gstatic.com/s/fraunces/v38/6NU58FyLNQOQZAnv9ZwNjucMHVn85Ni7emAe9lKqZTnbB-gzTK0K1ChjeveQ-e10563a873.woff2",
+      "mime": "font/woff2",
+      "size": 81520
+    },
+    "https://fonts.gstatic.com/s/fraunces/v38/6NU78FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0KxC9TeA.woff2": {
+      "path": "assets/fonts.gstatic.com/s/fraunces/v38/6NU78FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0KxC9TeA-6a8370661d.woff2",
+      "mime": "font/woff2",
+      "size": 67304
+    },
+    "https://raioxcarol.site.benvox.ai/v3/public/site/carol_almeida_26d075/logo": {
+      "path": "assets/raioxcarol.site.benvox.ai/v3/public/site/carol_almeida_26d075/logo-8d7a8858fe.png",
+      "mime": "image/png",
+      "size": 24243
+    },
+    "https://files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/47/4748932dde4ba3073828a773b146e93aeac20706f66012e7c0e1cad7cb9a1638?response-content-type=image%2Fjpeg": {
+      "path": "assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/47/4748932dde4ba3073828a773b146e93aeac20706f66012e7c0e1cad7cb9a1638-7b20faefff.jpg",
+      "mime": "image/jpeg",
+      "size": 175880
+    },
+    "https://files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/01/012584624f8cf38a3deb3c6d5366e3e0e0bd69bea43ef3bb50d3b52c3e07bfe1?response-content-type=image%2Fpng": {
+      "path": "assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/01/012584624f8cf38a3deb3c6d5366e3e0e0bd69bea43ef3bb50d3b52c3e07bfe1-c819166cd2.png",
+      "mime": "image/png",
+      "size": 1651127
+    },
+    "https://files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/55/55e67c2d48b6ea6d08d56cead49e965093b5a495943276df7d5ee696c779e29b?response-content-type=image%2Fpng": {
+      "path": "assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/55/55e67c2d48b6ea6d08d56cead49e965093b5a495943276df7d5ee696c779e29b-7f2fc62021.png",
+      "mime": "image/png",
+      "size": 923951
+    },
+    "https://files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/78/78f5bfbac322d5328c05859d88b1870fe8101dd5e0e17e9e9e45cebad8e488c1?response-content-type=image%2Fpng": {
+      "path": "assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/78/78f5bfbac322d5328c05859d88b1870fe8101dd5e0e17e9e9e45cebad8e488c1-ff25f4ad04.png",
+      "mime": "image/png",
+      "size": 1369407
+    }
+  },
+  "erros": []
+}

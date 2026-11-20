@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html class="js" lang="pt-BR"><head><link href="assets/raioxcarol.site.benvox.ai/v3/public/site/carol_almeida_26d075/logo-8d7a8858fe.png" rel="icon"/><link href="https://raioxcarol.site.benvox.ai/" rel="canonical"/><style data-benvox-brand="">:root{--brand-accent:#4dc4c7;--brand-bg:#062b33;--brand-surface:#0a3a44;--brand-fg:#eef7f7}</style><script data-benvox-runtime="">
+window.BENVOX={"tenant":"carol_almeida_26d075","api":"https://app.benvox.ai","appBase":"https://app.benvox.ai","chat":{"slug":"chat-do-site-2b5538"},"site":"8c2ce2fd-14f6-4c0e-a21d-e31aa3076ee3","whatsapp":"5591993826590","hasLogo":true,"currency":"BRL","locale":"pt-BR"};
+(function(){
+var B=window.BENVOX;
+function j(p){return fetch(B.api+p,B.draft?{cache:'no-store'}:void 0).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+/* productPhoto(id) continua aqui e continua a servir: paginas ja publicadas
+   chamam-no. Para uma pagina NOVA a resposta e photoUrl, que vem no item ja
+   absoluto e ja sabe se a foto e um ficheiro nosso ou um endereco de fora.
+   catalog(o): o recorte vai ao servidor ({category,q,sort,limit,cursor}, e o
+   offset das paginas antigas); devolve o MESMO array de sempre, com .total e
+   .nextCursor pendurados: a pagina seguinte e catalog({cursor:a.nextCursor}),
+   null no fim. .totalCapped: o total parou em 10000 e ha mais (14/11).
+   categories(): [{value,count}] das categorias no ar, para o menu. */
+window.BenvoxSite={
+catalog:function(o){o=o||{};var q=[];['category','q','sort','limit','offset','cursor'].forEach(function(k){if(o[k]!=null&&o[k]!=='')q.push(k+'='+encodeURIComponent(o[k]))});
+return j('/v3/public/catalog/'+B.tenant+(q.length?'?'+q.join('&'):'')).then(function(d){var a=d.products;a.total=d.total;a.totalCapped=!!d.totalCapped;a.nextCursor=d.nextCursor||null;return a})},
+categories:function(){return j('/v3/public/catalog/'+B.tenant+'/categories').then(function(d){return d.categories})},
+product:function(id){return j('/v3/public/catalog/'+B.tenant+'/'+id).then(function(d){return d.product})},
+productPhoto:function(id){return B.api+'/v3/public/catalog/'+B.tenant+'/'+id+'/photo'},
+logoUrl:function(){return 'assets/app.benvox.ai/v3/public/site/carol_almeida_26d075/logo-57529ef286.png'},
+chatUrl:function(){return B.chat?B.appBase+'/c/'+B.chat.slug:null},
+formEmbedUrl:function(slug){return B.appBase+'/embed/f/'+slug},
+whatsappUrl:function(msg){return B.whatsapp?'https://wa.me/'+B.whatsapp+(msg?'?text='+encodeURIComponent(msg):''):null},
+money:function(v){try{return new Intl.NumberFormat(B.locale,{style:'currency',currency:B.currency}).format(Number(v))}catch(e){return String(v)}},
+run:function(code,inputs){return fetch(B.api+'/v3/public/run/'+B.tenant+'/'+encodeURIComponent(code),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({inputs:inputs||{},session:sess(),site:B.site})}).then(function(r){return r.json().catch(function(){return {}}).then(function(d){if(!r.ok){var e=new Error(d.message||String(r.status));e.status=r.status;e.code=d.error;throw e}if('session' in d)keep(d.session);return d.result})})},
+signedIn:function(){return !!sess()},
+signOut:function(){keep(null)}
+};
+/* A sessao do visitante (BenvoxSite.run): no localStorage quando o navegador
+   deixa; no endereco /s/ a pagina corre em sandbox sem origem e ele lanca, e a
+   sessao fica so em memoria ate recarregar. */
+var SK='bx_session_'+B.tenant,mem=null;
+function sess(){var t=mem;try{t=localStorage.getItem(SK)||t}catch(e){}
+if(!t)return null;try{var p=JSON.parse(atob(t.split('.')[0].replace(/-/g,'+').replace(/_/g,'/')));if(p.exp*1000<Date.now()){keep(null);return null}}catch(e){return null}return t}
+function keep(t){mem=t;try{t?localStorage.setItem(SK,t):localStorage.removeItem(SK)}catch(e){}}
+var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function reveal(){
+var els=document.querySelectorAll('[data-reveal],[data-stagger]>*');
+if(reduced||!('IntersectionObserver' in window)){els.forEach(function(e){e.style.opacity='1';e.style.transform='none'});return}
+els.forEach(function(e,i){e.style.opacity='0';e.style.transform='translateY(14px)';e.style.transition='opacity .6s ease '+(i%8*60)+'ms, transform .6s ease '+(i%8*60)+'ms'});
+var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){en.target.style.opacity='1';en.target.style.transform='none';io.unobserve(en.target)}})},{threshold:.12});
+els.forEach(function(e){io.observe(e)});
+document.querySelectorAll('[data-count-up]').forEach(function(el){
+var target=parseFloat(el.getAttribute('data-count-up')||el.textContent)||0;
+var co=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting)return;co.unobserve(el);
+var t0=null;function tick(t){if(!t0)t0=t;var p=Math.min((t-t0)/1200,1);el.textContent=Math.round(target*(1-Math.pow(1-p,3))).toLocaleString(B.locale);if(p<1)requestAnimationFrame(tick)}
+if(reduced){el.textContent=target.toLocaleString(B.locale)}else{requestAnimationFrame(tick)}})},{threshold:.5});
+co.observe(el)});
+}
+/* data-scene: o progresso do elemento na rolagem, em CSS. --scene vai de 0 (entra por
+   baixo) a 1 (sai por cima); --scene-in de 0 a 1 enquanto ele chega. data-scene="pin"
+   numa secao mais alta que a tela: --scene vai de 0 a 1 so enquanto o palco sticky
+   esta preso (topo no topo ate o fim no fim). Sem movimento, parado num estado legivel. */
+function scenes(){
+var sc=document.querySelectorAll('[data-scene]');if(!sc.length)return;
+function set(e,p,i){e.style.setProperty('--scene',p);e.style.setProperty('--scene-in',i)}
+if(reduced){sc.forEach(function(e){set(e,'.5','1')});return}
+var queued=false;
+function clamp(v){return Math.min(Math.max(v,0),1).toFixed(3)}
+function paint(){queued=false;var vh=window.innerHeight||1;sc.forEach(function(e){var r=e.getBoundingClientRect();var pin=e.getAttribute('data-scene')==='pin'&&r.height>vh;set(e,clamp(pin?-r.top/(r.height-vh):(vh-r.top)/(vh+r.height)),clamp((vh-r.top)/(vh*.65)))})}
+function ask(){if(!queued){queued=true;requestAnimationFrame(paint)}}
+paint();window.addEventListener('scroll',ask,{passive:true});window.addEventListener('resize',ask)}
+function report(){try{parent.postMessage({benvox:'height',value:document.documentElement.scrollHeight},'*')}catch(e){}}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){reveal();scenes();report()})}else{reveal();scenes();report()}
+window.addEventListener('load',report);window.addEventListener('resize',report);
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Raio-X da sua comunicação · Sala Secreta com Carol Almeida</title>
+<meta content="Ao vivo, vamos fazer o Raio-X da sua comunicação e mostrar o que impede a sua competência de virar autoridade. Sala Secreta · Raio-X do Profissional de Alto Valor, com Carol Almeida: domingo, 29/11, às 9h, online e ao vivo, por R$ 29,90." name="description"/>
+<meta content="Raio-X da sua comunicação · Sala Secreta com Carol Almeida" property="og:title"/>
+<meta content="Domingo, 29/11, às 9h · online e ao vivo · R$ 29,90. Inclui Diagnóstico de Autoridade Comunicativa e Mapa de Evolução." property="og:description"/>
+<meta content="https://files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/a2/a22512dac53800f21df907ec50b45fcb3b7c98956eac8033985d6f09f45f9ea4?response-content-type=image%2Fjpeg" property="og:image"/>
+<meta content="#03181d" name="theme-color"/>
+<!-- Pixel do Meta (Facebook/Instagram Ads) — o mesmo da página atual da Sala Secreta -->
+
+<script>document.documentElement.classList.add('js');</script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="assets/fonts.googleapis.com/css2-7173c0e3ca.css" rel="stylesheet"/>
+<link as="image" href="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/a2/a22512dac53800f21df907ec50b45fcb3b7c98956eac8033985d6f09f45f9ea4-39472726ef.jpg" rel="preload"/>
+<style>
+:root{--deep:#03181d;--petro:#062b33;--petro2:#0a3a44;--accent:var(--brand-accent,#4dc4c7);--soft:#94dbdd;--tealdk:#0b666b;--ink:#0a2228;--paper:#f6f2ea;--paper2:#ede6d9;--fg:#eef7f7;--coral:#cf5a45}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--petro);color:var(--fg);font-family:"Public Sans",ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+img{max-width:100%;display:block}
+.wrap{width:100%;max-width:72rem;margin:0 auto;padding:0 1.25rem}
+@media(min-width:640px){.wrap{padding:0 2rem}}
+.serif{font-family:Fraunces,Georgia,"Times New Roman",serif;font-optical-sizing:auto}
+section[id]{scroll-margin-top:4.5rem}
+.kicker{display:inline-flex;align-items:center;gap:.6rem;font-size:.72rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--soft);margin:0}
+.kicker::before{content:"";width:.55rem;height:.55rem;border:1.5px solid currentColor;transform:rotate(45deg);flex:none}
+.on-paper .kicker{color:var(--tealdk)}
+.h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(1.95rem,3.8vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.h2 em{font-style:italic;font-weight:500;color:var(--accent)}
+.on-paper .h2 em{color:var(--tealdk)}
+
+/* botão no estilo da referência: retângulo, caixa alta, brilho que corre */
+.cta{display:inline-flex;align-items:center;justify-content:space-between;gap:1.4rem;min-height:3.8rem;padding:1.05rem 1.5rem 1.05rem 1.8rem;border-radius:3px;background:linear-gradient(100deg,#3fb3b6 0%,#9fe2e3 45%,#4dc4c7 70%,#3fb3b6 100%);background-size:220% 100%;background-position:0 0;color:#03222a;font-weight:800;font-size:.9rem;letter-spacing:.09em;text-transform:uppercase;text-decoration:none;line-height:1.3;text-align:left;box-shadow:0 20px 44px -18px rgba(77,196,199,.8),inset 0 1px 0 rgba(255,255,255,.55);transition:background-position .6s ease,transform .2s ease;border:0;cursor:pointer;font-family:inherit}
+.cta:hover{background-position:100% 0;transform:translateY(-2px)}
+.cta svg{flex:none;transition:transform .2s}
+.cta:hover svg{transform:translateX(4px)}
+.on-paper .cta{box-shadow:0 18px 38px -20px rgba(11,102,107,.65),inset 0 1px 0 rgba(255,255,255,.55)}
+.cta-note{font-size:.86rem;line-height:1.55;color:rgba(238,247,247,.72);margin:.9rem 0 0}
+.on-paper .cta-note{color:#56686b}
+.ghost{display:inline-flex;align-items:center;gap:.6rem;min-height:3.2rem;padding:.8rem 1.4rem;border:1.5px solid var(--tealdk);color:var(--tealdk);font-weight:800;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;background:transparent;border-radius:3px;cursor:pointer;font-family:inherit}
+.ghost:hover{background:rgba(11,102,107,.08)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--soft);outline-offset:3px}
+.on-paper a:focus-visible,.on-paper button:focus-visible,.on-paper summary:focus-visible{outline-color:var(--tealdk)}
+
+/* aviso no topo e cabeçalho que aparece ao rolar */
+.topbar{background:var(--accent);color:#03222a;text-align:center;font-weight:800;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;padding:.75rem 1rem;line-height:1.5}
+.topbar b{font-weight:800;border-bottom:2px solid rgba(3,34,42,.4)}
+.bar-head{position:fixed;inset:0 0 auto 0;z-index:50;background:rgba(3,24,29,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(148,219,221,.16);transform:translateY(-110%);transition:transform .35s ease}
+.bar-head.show{transform:none}
+.mono{width:2.3rem;height:2.3rem;border:1.5px solid var(--soft);border-radius:999px;display:grid;place-items:center;font-family:Fraunces,serif;font-size:.95rem;font-weight:600;color:var(--soft);flex:none}
+.brand-name{font-family:Fraunces,serif;font-weight:600;font-size:1.1rem;line-height:1}
+.brand-name small{display:block;font-family:"Public Sans",sans-serif;font-size:.56rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:rgba(238,247,247,.6);margin-top:.3rem}
+.cta-sm{min-height:2.6rem;padding:.55rem 1rem;font-size:.7rem;gap:.6rem}
+
+/* abertura */
+.hero{position:relative;overflow:hidden;background:radial-gradient(55% 65% at 88% 35%,rgba(77,196,199,.17),rgba(77,196,199,0) 70%),radial-gradient(55% 60% at 0% 100%,rgba(17,80,92,.65),rgba(17,80,92,0) 70%),linear-gradient(180deg,var(--deep) 0%,var(--petro) 100%)}
+.hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(148,219,221,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(148,219,221,.045) 1px,transparent 1px);background-size:72px 72px;pointer-events:none}
+.h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(2.25rem,5.2vw,4.5rem);line-height:1.03;letter-spacing:-.022em;margin:0}
+.h1 .acc{display:block;color:var(--accent);font-style:italic;font-weight:500}
+.rule{height:1px;background:linear-gradient(90deg,rgba(148,219,221,.45),rgba(148,219,221,.06))}
+.lead{font-size:clamp(1.05rem,1.35vw,1.2rem);line-height:1.72;color:rgba(238,247,247,.86);margin:0}
+.lead strong{color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(148,219,221,.26);max-width:34rem}
+.stats div{padding:1rem .4rem;text-align:center}
+.stats div+div{border-left:1px solid rgba(148,219,221,.26)}
+.stats b{display:block;font-family:Fraunces,serif;font-size:1.65rem;font-weight:600;color:var(--soft);line-height:1.1}
+.stats span{display:block;margin-top:.25rem;font-size:.74rem;line-height:1.3;color:rgba(238,247,247,.66)}
+.hero-photo{position:relative;margin:0}
+.hero-photo::before{content:"";position:absolute;inset:1.1rem -1.1rem -1.1rem 1.1rem;border:1px solid rgba(148,219,221,.32);pointer-events:none}
+.hero-photo .ph{position:relative;aspect-ratio:5/6;overflow:hidden;background:#1d2a2d}
+.hero-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 14%;transform-origin:50% 22%;transform:scale(calc(1.03 + var(--scene,.5) * .1)) translateY(calc((var(--scene,.5) - .5) * -28px))}
+.hero-photo figcaption{position:absolute;left:1rem;bottom:1rem;font-size:.66rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;background:rgba(3,24,29,.78);padding:.5rem .8rem;color:var(--fg)}
+
+/* a dor */
+.on-paper{background:linear-gradient(180deg,var(--paper) 0%,var(--paper2) 100%);color:var(--ink)}
+.body-ink{font-size:1.06rem;line-height:1.82;color:#3a4d51;margin:0}
+.body-ink+.body-ink{margin-top:1.1rem}
+.pains{list-style:none;margin:0;padding:0;border-top:1px solid rgba(10,34,40,.14)}
+.pains li{display:flex;gap:1rem;align-items:flex-start;padding:1.1rem 0;border-bottom:1px solid rgba(10,34,40,.14);font-size:1.06rem;line-height:1.55;color:#22363a;opacity:calc(.3 + var(--scene-in,1) * .7);transform:translateX(calc((1 - var(--scene-in,1)) * 26px))}
+.pains svg{flex:none;margin-top:.15rem}
+.pains path{stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--scene-in,1))}
+@media(max-width:767px){.pains li{transform:none}}
+.scrub{display:block;opacity:calc(.14 + var(--scene-in,1) * .86)}
+.h-turn{font-family:Fraunces,Georgia,serif;font-size:clamp(1.75rem,3.3vw,2.8rem);line-height:1.15;font-weight:600;letter-spacing:-.012em;margin:0}
+.h-turn em{font-style:italic;font-weight:500;color:var(--tealdk)}
+
+/* o raio-x: exemplo completo, já pronto (sem animação) */
+.xr{background:radial-gradient(60% 50% at 50% 0%,rgba(17,80,92,.6),rgba(17,80,92,0) 70%),var(--deep)}
+.xr-demo{background:var(--deep)}
+.xr-ex-title{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(1.5rem,2.6vw,2.1rem);line-height:1.2;margin:0;color:var(--fg);text-wrap:balance}
+.xr-ex-title em{font-style:italic;font-weight:500;color:var(--accent)}
+.film{position:relative;border-radius:6px;overflow:hidden;box-shadow:0 40px 90px -40px rgba(0,0,0,.95);border:1px solid rgba(148,219,221,.26)}
+.film-layer{padding:1.4rem 1.4rem 1.6rem}
+@media(min-width:640px){.film-layer{padding:2.1rem 2.3rem 2.4rem}}
+.film-label{font-size:.64rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;margin:0 0 1.1rem;display:flex;justify-content:space-between;gap:1rem;line-height:1.5}
+.film-label span:last-child{flex:none}
+@media(max-width:480px){.film-label{letter-spacing:.14em}}
+.film-text{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:clamp(1.08rem,1.8vw,1.42rem);line-height:1.78;margin:0}
+.film-xray{background:linear-gradient(rgba(148,219,221,.07) 1px,transparent 1px) 0 0/100% 26px,radial-gradient(80% 75% at 45% 40%,#0c3e48 0%,#02141a 100%);color:rgba(148,219,221,.6)}
+.film-xray .film-label{color:var(--accent)}
+.film-xray mark{position:relative;background:rgba(77,196,199,.16);color:#effcfc;border-radius:2px;box-shadow:0 0 0 1px rgba(77,196,199,.8),0 0 18px rgba(77,196,199,.35);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.tag{display:inline-block;min-width:1.55em;height:1.55em;padding:0 .3em;border-radius:999px;background:var(--accent);color:#03222a;font:800 .6em/1.55em "Public Sans",sans-serif;text-align:center;font-style:normal;vertical-align:.22em;margin:0 .45em 0 .08em}
+.film-after{background:var(--paper);color:var(--ink);border-color:rgba(148,219,221,.55)}
+.film-after .film-label{color:var(--tealdk)}
+.film-after mark{background:linear-gradient(180deg,transparent 56%,rgba(77,196,199,.4) 56%);color:var(--ink);padding:0 .08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.film-after .tag{background:var(--tealdk);color:#fff}
+.xr-turn{display:flex;align-items:center;gap:1rem;margin:3.5rem 0 2.5rem;color:var(--accent)}
+.xr-turn::before{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(148,219,221,0),rgba(148,219,221,.45))}
+.xr-turn::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(148,219,221,.45),rgba(148,219,221,0))}
+.xr-turn span{display:inline-flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;padding:.6rem 1.05rem;border:1px solid rgba(148,219,221,.4);border-radius:999px;white-space:nowrap}
+.nw{white-space:nowrap}
+.xr-note{margin:2rem 0 0;font-size:.82rem;line-height:1.5;color:rgba(238,247,247,.55)}
+.dims{list-style:none;margin:0;padding:0}
+.dim{display:grid;grid-template-columns:2rem 1fr;column-gap:.9rem;padding:.95rem 0;border-top:1px solid rgba(148,219,221,.14)}
+.dim:last-child{border-bottom:1px solid rgba(148,219,221,.14)}
+.dim b{grid-row:span 2;width:1.85rem;height:1.85rem;border-radius:999px;display:grid;place-items:center;background:var(--accent);color:#03222a;font-size:.78rem;font-weight:800}
+.dims-after .dim b{background:transparent;border:1.5px solid var(--accent);color:var(--accent)}
+.dim h4{margin:0;font-size:1rem;font-weight:700;line-height:1.35;color:var(--fg)}
+.dim p{margin:.2rem 0 0;font-size:.93rem;line-height:1.55;color:rgba(238,247,247,.74)}
+@media(max-width:767px){.xr-turn{margin:2.75rem 0 2rem}.xr-turn span{letter-spacing:.16em}}
+
+/* a transformação (cena fixa 2) */
+.tf-stage{--q:clamp(0,calc((var(--scene,0) - .06) * 1.2),1);padding:4.5rem 0 3rem}
+.js .tf-pin{height:340vh}
+.js .tf-stage{position:sticky;top:0;height:100vh;height:100svh;overflow-x:clip;display:flex;flex-direction:column;justify-content:center;padding:4.25rem 0 1.5rem}
+/* no celular a cena não fica presa: os cartões deslizam para o lado (bloco mais abaixo) */
+.tf-track{display:flex;flex-wrap:wrap;gap:1.25rem;padding:0 1.25rem}
+.tf-card{width:100%;background:#fff;border:1px solid rgba(10,34,40,.1);border-radius:6px;padding:1.5rem 1.5rem 1.6rem;box-shadow:0 30px 60px -36px rgba(10,34,40,.45);display:flex;flex-direction:column}
+@media(min-width:768px){.tf-card{width:calc(50% - .65rem)}}
+.js .tf-track{flex-wrap:nowrap;width:max-content;transform:translateX(calc(var(--q) * (100vw - 100%)))}
+.js .tf-card{width:min(80vw,25rem)}
+@media(min-width:640px){.js .tf-track{gap:1.6rem;padding:0 max(2rem,calc((100vw - 72rem) / 2 + 2rem))}}
+.tf-n{font-family:Fraunces,serif;font-size:2.2rem;font-weight:600;color:#c3d6d5;line-height:1}
+.tf-lbl{font-size:.62rem;font-weight:800;letter-spacing:.26em;text-transform:uppercase;margin:0}
+.tf-de{margin:.45rem 0 0;color:#7a888b;font-size:1rem;line-height:1.55;text-decoration:line-through;text-decoration-color:rgba(207,90,69,.6);text-decoration-thickness:1.5px}
+.tf-para{margin:.45rem 0 0;font-family:Fraunces,serif;font-size:clamp(1.15rem,1.8vw,1.35rem);line-height:1.35;font-weight:600;color:var(--ink)}
+.tf-arrow{display:flex;align-items:center;gap:.6rem;margin:1.1rem 0;color:var(--tealdk)}
+.tf-arrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(11,102,107,.5),rgba(11,102,107,0))}
+.tf-progress{position:relative;height:2px;background:rgba(10,34,40,.12);margin-top:2rem}
+.tf-progress span{position:absolute;inset:0;background:var(--tealdk);transform-origin:0 50%;transform:scaleX(var(--q))}
+.tf-count{font-variant-numeric:tabular-nums}
+.tf-hint{display:none}
+/* celular: sem cena presa (em telas mais baixas os cartões passavam por cima do bloco seguinte); os cartões deslizam com o dedo */
+@media(max-width:767px){
+  .js .tf-pin{height:auto}
+  .js .tf-stage{position:static;height:auto;display:block;padding:4.5rem 0 2.5rem}
+  .js .tf-track{width:auto;transform:none;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;gap:1rem;padding:.25rem 1.25rem 2.75rem;scroll-padding-left:1.25rem}
+  .js .tf-track::-webkit-scrollbar{display:none}
+  .js .tf-track::after{content:"";flex:0 0 .25rem}
+  .js .tf-card{flex:none;width:82vw;max-width:22rem;scroll-snap-align:start}
+  .tf-progress{margin-top:.25rem}
+  .tf-progress span{transform:scaleX(var(--sw,.2));transition:transform .15s linear}
+  .tf-hint{display:flex;align-items:center;gap:.5rem;margin:1.1rem 0 0;font-size:.74rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--tealdk)}
+}
+
+/* bônus logo na abertura */
+.hero-bonus{display:flex;align-items:center;gap:1rem;max-width:34rem;padding:.95rem 1.1rem;border:1px dashed rgba(148,219,221,.55);background:rgba(77,196,199,.08);color:var(--fg);text-decoration:none;transition:background .2s}
+.hero-bonus:hover{background:rgba(77,196,199,.15)}
+.hb-tag{flex:none;background:var(--accent);color:#03222a;font-weight:800;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;padding:.5rem .65rem;border-radius:2px;line-height:1.25;text-align:center}
+.hb-list{display:block}
+.hb-list span{display:block;font-size:.92rem;font-weight:600;line-height:1.45}
+.hb-list span+span{margin-top:.2rem}
+
+/* vozes: prints de quem já colocou a voz no mundo */
+.vozes{background:radial-gradient(60% 50% at 88% 0%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%),linear-gradient(180deg,#e3f4f4 0%,#c4e9ea 100%)}
+.vz-grid{display:grid;gap:3.5rem}
+@media(min-width:768px){.vz-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;align-items:start}.vz:nth-child(2){margin-top:4rem}}
+@media(min-width:1024px){.vz-grid{gap:2.75rem}}
+.vz:nth-child(1){--r:-2.4deg}.vz:nth-child(2){--r:1.8deg}.vz:nth-child(3){--r:-1.4deg}
+@media(max-width:767px){.vz:nth-child(1){--r:-1.5deg}.vz:nth-child(2){--r:1.3deg}.vz:nth-child(3){--r:-1.1deg}}
+.vz-shot{position:relative;display:block;width:100%;padding:0;border:0;background:#fff;border-radius:10px;overflow:hidden;cursor:zoom-in;box-shadow:0 36px 64px -34px rgba(6,43,51,.6),0 0 0 1px rgba(6,43,51,.06);transform-origin:50% 100%;transform:translateY(calc((1 - var(--scene-in,1)) * 80px)) rotate(calc(var(--r,0deg) * (.35 + (1 - var(--scene-in,1)) * 2.2)));transition:box-shadow .25s}
+.vz-shot:hover{box-shadow:0 44px 80px -34px rgba(6,43,51,.72),0 0 0 1px rgba(6,43,51,.08)}
+.vz-shot img{width:100%;height:auto}
+.vz-zoom{position:absolute;right:.75rem;bottom:.75rem;width:2.4rem;height:2.4rem;border-radius:999px;background:rgba(3,24,29,.82);color:#fff;display:grid;place-items:center}
+.vz-where{margin:1.7rem 0 0;font-size:.68rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--tealdk)}
+.vz-quote{margin:.55rem 0 0;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(1.2rem,1.7vw,1.4rem);line-height:1.3;color:var(--ink);text-wrap:balance}
+.vz-ctx{margin:.55rem 0 0;font-size:.97rem;line-height:1.65;color:#3a4d51}
+.vz-hint{margin:2rem 0 0;font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#56686b}
+.zoom{padding:0;border:0;background:transparent;max-width:min(94vw,44rem);max-height:94vh;overflow:visible}
+.zoom::backdrop{background:rgba(3,24,29,.88)}
+.zoom img{display:block;width:auto;max-width:100%;max-height:92vh;border-radius:10px;margin:0 auto;background:#fff}
+.zoom-x{position:absolute;top:.6rem;right:.6rem;width:2.6rem;height:2.6rem;border-radius:999px;border:0;background:#fff;color:#03222a;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+
+/* o que você leva */
+.leva{background:linear-gradient(180deg,var(--deep) 0%,var(--petro) 100%)}
+.item.is-bonus .num{color:var(--accent)}
+.pill{display:inline-block;background:var(--accent);color:#03222a;font-weight:800;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;padding:.42rem .7rem;border-radius:2px;line-height:1.2}
+.item{display:grid;grid-template-columns:1fr;gap:1rem;padding:2rem 0;border-top:1px solid rgba(148,219,221,.18)}
+.item:last-child{border-bottom:1px solid rgba(148,219,221,.18)}
+@media(min-width:768px){.item{grid-template-columns:5rem 1fr 12rem;align-items:center;gap:2rem;padding:2.4rem 0}}
+.item .num{font-family:Fraunces,serif;font-size:2.6rem;color:rgba(148,219,221,.5);font-weight:600;line-height:1}
+.item h3{font-family:Fraunces,serif;font-weight:600;font-size:clamp(1.3rem,2.2vw,1.75rem);margin:0;line-height:1.2}
+.item p{margin:.6rem 0 0;color:rgba(238,247,247,.75);line-height:1.7}
+.item .art{height:7rem;display:flex;align-items:center}
+@media(min-width:768px){.item .art{justify-content:flex-end;height:8rem}}
+.draw{stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--scene-in,1))}
+.dot-in{opacity:clamp(0,calc((var(--scene-in,1) - .65) * 3),1)}
+
+/* carol */
+.carol-photo{position:relative;margin:0 auto;max-width:30rem}
+.carol-photo::before{content:"";position:absolute;inset:-1rem 1rem 1rem -1rem;border:1px solid rgba(11,102,107,.35);pointer-events:none}
+.carol-photo .ph{position:relative;aspect-ratio:4/5;overflow:hidden;background:#cfd9dc;clip-path:inset(0 0 calc((1 - var(--scene-in,1)) * 42%) 0)}
+.carol-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 28%;transform:scale(calc(1.12 - var(--scene-in,1) * .12))}
+.quote{font-family:Fraunces,serif;font-style:italic;font-size:1.35rem;line-height:1.45;border-left:3px solid var(--accent);padding-left:1.1rem;color:var(--ink);margin:0}
+.creds{display:flex;flex-wrap:wrap;gap:.5rem}
+.creds li{list-style:none;padding:.4rem .8rem;border:1px solid rgba(10,34,40,.16);border-radius:999px;font-size:.82rem;font-weight:600;color:#2a3e42;background:rgba(255,255,255,.55)}
+
+/* oferta */
+.offer{position:relative;background:radial-gradient(55% 60% at calc(25% + var(--scene,.5) * 50%) 25%,rgba(77,196,199,.2),rgba(77,196,199,0) 70%),linear-gradient(180deg,var(--deep) 0%,var(--petro) 100%)}
+.ticket{position:relative;display:grid;border:1px solid rgba(148,219,221,.36);background:linear-gradient(140deg,rgba(17,80,92,.6),rgba(3,24,29,.65));transform:translateY(calc((1 - var(--scene-in,1)) * 56px)) scale(calc(.95 + var(--scene-in,1) * .05))}
+@media(min-width:900px){.ticket{grid-template-columns:1.12fr .88fr}}
+.t-left,.t-right{position:relative;padding:2rem 1.4rem}
+.t-right{border-top:1px dashed rgba(148,219,221,.42)}
+@media(min-width:640px){.t-left,.t-right{padding:2.6rem 2.4rem}}
+@media(min-width:900px){.t-right{border-top:0;border-left:1px dashed rgba(148,219,221,.42)}}
+.notch{position:absolute;width:1.5rem;height:1.5rem;border-radius:999px;background:var(--deep);border:1px solid rgba(148,219,221,.36)}
+.n1{top:-.75rem;left:-.75rem}.n2{top:-.75rem;right:-.75rem}
+@media(min-width:900px){.n1{top:-.75rem;left:-.75rem;right:auto}.n2{top:auto;bottom:-.75rem;left:-.75rem;right:auto}}
+.t-lbl{font-size:.68rem;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--soft);margin:0}
+.checks{list-style:none;margin:1.2rem 0 0;padding:0}
+.checks li{display:flex;gap:.85rem;align-items:flex-start;padding:.95rem 0;border-bottom:1px solid rgba(148,219,221,.14);line-height:1.5}
+.checks svg{flex:none;margin-top:.2rem;color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin-top:1.4rem;font-size:.82rem;font-weight:700;letter-spacing:.06em;color:rgba(238,247,247,.8)}
+.meta span{display:inline-flex;align-items:center;gap:.45rem}
+.price{font-family:Fraunces,serif;font-weight:600;font-size:clamp(3.6rem,8vw,5.4rem);line-height:1;color:var(--soft);margin:.6rem 0 0;letter-spacing:-.02em}
+.price small{font-size:.36em;vertical-align:.95em;margin-right:.35rem;letter-spacing:0}
+.clock{display:flex;gap:.5rem;margin-top:1.3rem}
+.clock div{flex:1;text-align:center;border:1px solid rgba(148,219,221,.24);padding:.55rem .25rem}
+.clock b{display:block;font-family:Fraunces,serif;font-size:1.45rem;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.clock span{display:block;margin-top:.25rem;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,247,247,.6)}
+
+/* dúvidas */
+.faq{border-top:1px solid rgba(10,34,40,.16)}
+.faq details{border-bottom:1px solid rgba(10,34,40,.16)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:1.35rem 0;font-family:Fraunces,serif;font-weight:600;font-size:clamp(1.1rem,1.8vw,1.35rem);line-height:1.35;color:var(--ink)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary svg{flex:none;margin-top:.3rem;transition:transform .25s;color:var(--tealdk)}
+.faq details[open] summary svg{transform:rotate(180deg)}
+.faq .ans{padding:0 0 1.4rem;color:#3a4d51;line-height:1.78;margin:0;max-width:44rem}
+
+/* fechamento */
+.final{position:relative;overflow:hidden;background:var(--deep)}
+.final-glow{position:absolute;left:50%;top:60%;width:64rem;height:64rem;margin:-32rem 0 0 -32rem;border-radius:50%;background:radial-gradient(circle,rgba(77,196,199,.3) 0%,rgba(77,196,199,0) 60%);opacity:calc(.15 + var(--scene-in,1) * .85);transform:scale(calc(.55 + var(--scene-in,1) * .45));pointer-events:none}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .tf-pin{height:auto}
+  .js .tf-stage{position:static;height:auto;padding:3rem 0}
+  .js .tf-track{transform:none;flex-wrap:wrap;width:auto;padding:0 1.25rem;overflow:visible}
+  .tf-hint,.tf-progress{display:none}
+  .js .tf-card{width:100%}
+  .pains li,.scrub{opacity:1;transform:none}
+  .ticket,.hero-photo img,.carol-photo img{transform:none}
+  .carol-photo .ph{clip-path:none}
+  .final-glow{opacity:1;transform:none}
+  .vz-shot{transform:rotate(calc(var(--r,0deg) * .35));transition:none}
+  .draw{stroke-dashoffset:0}
+  .dot-in{opacity:1}
+  .cta,.bar-head,.cta svg{transition:none}
+}
+@media (prefers-reduced-motion:reduce) and (min-width:768px){.js .tf-card{width:calc(50% - .65rem)}.js .tf-track{padding:0 2rem}}
+</style>
+<style data-benvox-tw="">*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}/*
+! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  letter-spacing: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}.absolute {
+  position: absolute;
+}.relative {
+  position: relative;
+}.m-0 {
+  margin: 0px;
+}.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}.ml-1 {
+  margin-left: 0.25rem;
+}.mt-10 {
+  margin-top: 2.5rem;
+}.mt-12 {
+  margin-top: 3rem;
+}.mt-14 {
+  margin-top: 3.5rem;
+}.mt-16 {
+  margin-top: 4rem;
+}.mt-3 {
+  margin-top: 0.75rem;
+}.mt-4 {
+  margin-top: 1rem;
+}.mt-5 {
+  margin-top: 1.25rem;
+}.mt-6 {
+  margin-top: 1.5rem;
+}.mt-7 {
+  margin-top: 1.75rem;
+}.mt-8 {
+  margin-top: 2rem;
+}.mt-9 {
+  margin-top: 2.25rem;
+}.block {
+  display: block;
+}.inline-block {
+  display: inline-block;
+}.flex {
+  display: flex;
+}.grid {
+  display: grid;
+}.hidden {
+  display: none;
+}.h-10 {
+  height: 2.5rem;
+}.h-14 {
+  height: 3.5rem;
+}.h-full {
+  height: 100%;
+}.h-px {
+  height: 1px;
+}.w-auto {
+  width: auto;
+}.w-full {
+  width: 100%;
+}.max-w-\[140px\] {
+  max-width: 140px;
+}.max-w-\[150px\] {
+  max-width: 150px;
+}.max-w-\[17ch\] {
+  max-width: 17ch;
+}.max-w-\[180px\] {
+  max-width: 180px;
+}.max-w-\[22ch\] {
+  max-width: 22ch;
+}.max-w-\[24ch\] {
+  max-width: 24ch;
+}.max-w-\[25ch\] {
+  max-width: 25ch;
+}.max-w-\[26rem\] {
+  max-width: 26rem;
+}.max-w-\[30ch\] {
+  max-width: 30ch;
+}.max-w-\[40rem\] {
+  max-width: 40rem;
+}.max-w-\[42rem\] {
+  max-width: 42rem;
+}.max-w-\[46rem\] {
+  max-width: 46rem;
+}.max-w-\[52rem\] {
+  max-width: 52rem;
+}.max-w-\[60rem\] {
+  max-width: 60rem;
+}.shrink-0 {
+  flex-shrink: 0;
+}.transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}.resize {
+  resize: both;
+}.list-none {
+  list-style-type: none;
+}.flex-col {
+  flex-direction: column;
+}.flex-wrap {
+  flex-wrap: wrap;
+}.items-start {
+  align-items: flex-start;
+}.items-end {
+  align-items: flex-end;
+}.items-center {
+  align-items: center;
+}.justify-between {
+  justify-content: space-between;
+}.gap-10 {
+  gap: 2.5rem;
+}.gap-14 {
+  gap: 3.5rem;
+}.gap-2 {
+  gap: 0.5rem;
+}.gap-3 {
+  gap: 0.75rem;
+}.gap-4 {
+  gap: 1rem;
+}.gap-5 {
+  gap: 1.25rem;
+}.border-t {
+  border-top-width: 1px;
+}.border-\[rgba\(10\2c 34\2c 40\2c \.12\)\] {
+  border-color: rgba(10,34,40,.12);
+}.border-white\/10 {
+  border-color: rgb(255 255 255 / 0.1);
+}.bg-\[\#020f13\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(2 15 19 / var(--tw-bg-opacity, 1));
+}.bg-\[rgba\(10\2c 34\2c 40\2c \.14\)\] {
+  background-color: rgba(10,34,40,.14);
+}.object-contain {
+  object-fit: contain;
+}.p-0 {
+  padding: 0px;
+}.py-10 {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}.py-24 {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}.pb-20 {
+  padding-bottom: 5rem;
+}.pb-24 {
+  padding-bottom: 6rem;
+}.pb-6 {
+  padding-bottom: 1.5rem;
+}.pr-16 {
+  padding-right: 4rem;
+}.pt-10 {
+  padding-top: 2.5rem;
+}.pt-20 {
+  padding-top: 5rem;
+}.pt-4 {
+  padding-top: 1rem;
+}.pt-8 {
+  padding-top: 2rem;
+}.align-middle {
+  vertical-align: middle;
+}.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}.text-\[\.68rem\] {
+  font-size: .68rem;
+}.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}.font-bold {
+  font-weight: 700;
+}.font-semibold {
+  font-weight: 600;
+}.uppercase {
+  text-transform: uppercase;
+}.leading-relaxed {
+  line-height: 1.625;
+}.tracking-\[\.2em\] {
+  letter-spacing: .2em;
+}.text-\[\#56686b\] {
+  --tw-text-opacity: 1;
+  color: rgb(86 104 107 / var(--tw-text-opacity, 1));
+}.text-\[\#9a5a4e\] {
+  --tw-text-opacity: 1;
+  color: rgb(154 90 78 / var(--tw-text-opacity, 1));
+}.text-\[var\(--soft\)\] {
+  color: var(--soft);
+}.text-\[var\(--tealdk\)\] {
+  color: var(--tealdk);
+}.text-inherit {
+  color: inherit;
+}.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}.text-white\/50 {
+  color: rgb(255 255 255 / 0.5);
+}.text-white\/60 {
+  color: rgb(255 255 255 / 0.6);
+}.text-white\/70 {
+  color: rgb(255 255 255 / 0.7);
+}.text-white\/80 {
+  color: rgb(255 255 255 / 0.8);
+}.no-underline {
+  text-decoration-line: none;
+}.hover\:text-white:hover {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}@media (min-width: 640px) {
+
+  .sm\:block {
+    display: block;
+  }
+
+  .sm\:w-auto {
+    width: auto;
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:items-end {
+    align-items: flex-end;
+  }
+
+  .sm\:items-center {
+    align-items: center;
+  }
+
+  .sm\:pb-10 {
+    padding-bottom: 2.5rem;
+  }
+
+  .sm\:pr-0 {
+    padding-right: 0px;
+  }
+}@media (min-width: 768px) {
+
+  .md\:block {
+    display: block;
+  }
+}@media (min-width: 1024px) {
+
+  .lg\:-mt-2 {
+    margin-top: -0.5rem;
+  }
+
+  .lg\:mr-0 {
+    margin-right: 0px;
+  }
+
+  .lg\:mt-10 {
+    margin-top: 2.5rem;
+  }
+
+  .lg\:mt-12 {
+    margin-top: 3rem;
+  }
+
+  .lg\:mt-14 {
+    margin-top: 3.5rem;
+  }
+
+  .lg\:mt-16 {
+    margin-top: 4rem;
+  }
+
+  .lg\:mt-20 {
+    margin-top: 5rem;
+  }
+
+  .lg\:mt-24 {
+    margin-top: 6rem;
+  }
+
+  .lg\:max-w-\[24ch\] {
+    max-width: 24ch;
+  }
+
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-\[\.9fr_1\.1fr\] {
+    grid-template-columns: .9fr 1.1fr;
+  }
+
+  .lg\:grid-cols-\[1\.05fr_\.95fr\] {
+    grid-template-columns: 1.05fr .95fr;
+  }
+
+  .lg\:gap-16 {
+    gap: 4rem;
+  }
+
+  .lg\:gap-20 {
+    gap: 5rem;
+  }
+
+  .lg\:py-28 {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+
+  .lg\:py-36 {
+    padding-top: 9rem;
+    padding-bottom: 9rem;
+  }
+
+  .lg\:pb-28 {
+    padding-bottom: 7rem;
+  }
+
+  .lg\:pt-10 {
+    padding-top: 2.5rem;
+  }
+
+  .lg\:pt-14 {
+    padding-top: 3.5rem;
+  }
+
+  .lg\:pt-28 {
+    padding-top: 7rem;
+  }
+}</style></head>
+<body>
+<p class="topbar"><span>Sala Secreta · domingo, 29/11, às 9h · online e ao vivo · R$ 29,90</span><span id="falta-topo"> · faltam 9 dias</span></p>
+<header class="bar-head" id="bar-head">
+<div class="wrap h-14 flex items-center justify-between gap-3">
+<a aria-label="Carol Almeida, voltar ao início" class="flex items-center gap-3 shrink-0 text-inherit no-underline" href="#inicio">
+<img alt="Carol Almeida" class="h-10 w-auto max-w-[140px] object-contain" data-logo="" src="assets/app.benvox.ai/v3/public/site/carol_almeida_26d075/logo-57529ef286.png" style="display: block;"/>
+<span class="flex items-center gap-3" data-logo-fallback="" style="display: none;"><span aria-hidden="true" class="mono">CA</span><span class="brand-name hidden sm:block">Carol Almeida<small>Comunicação</small></span></span>
+</a>
+<p class="hidden md:block text-[.68rem] font-bold tracking-[.2em] uppercase text-white/70 m-0">Raio-X · 29.11 · 9h · ao vivo</p>
+<a class="cta cta-sm" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Garantir vaga · R$ 29,90</a>
+</div>
+</header>
+<main id="conteudo">
+<!-- 1 · ABERTURA: a promessa para quem já sabe que comunicação importa -->
+<section aria-labelledby="titulo" class="hero pt-8 pb-20 lg:pt-10 lg:pb-28" id="inicio">
+<div class="wrap relative">
+<div class="flex items-center gap-3">
+<img alt="Carol Almeida" class="h-14 w-auto max-w-[180px] object-contain" data-logo="" src="assets/app.benvox.ai/v3/public/site/carol_almeida_26d075/logo-57529ef286.png" style="display: block;"/>
+<span class="flex items-center gap-3" data-logo-fallback="" style="display: none;"><span aria-hidden="true" class="mono">CA</span><span class="brand-name">Carol Almeida<small>Comunicação de Alto impacto</small></span></span>
+</div>
+<p class="kicker mt-10 lg:mt-14">Sala Secreta · Raio-X do Profissional de Alto Valor</p>
+<h1 class="h1 mt-5 max-w-[17ch] lg:max-w-[24ch]" id="titulo">Ao vivo, vamos fazer o Raio-X da sua comunicação <span class="acc">e mostrar o que impede a sua COMPETÊNCIA de virar AUTORIDADE.</span></h1>
+<div class="rule mt-10 lg:mt-12"></div>
+<div class="mt-10 grid lg:grid-cols-[1.05fr_.95fr] gap-14 lg:gap-16 items-start">
+<div>
+<p class="lead">Um encontro online com <strong>Carol Almeida</strong> para você enxergar onde a sua comunicação está escondendo o seu valor — e saber por onde começar a mudar isso.</p>
+<a class="cta mt-8 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero fazer meu Raio-X
+          <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note"><strong class="text-white">R$ 29,90</strong> · domingo, <time datetime="2026-11-29T09:00:00-03:00">29/11, às 9h</time> (horário de Brasília) · online e ao vivo.</p>
+<a aria-label="Ver os 2 bônus incluídos: Diagnóstico de Autoridade Comunicativa e Mapa de Evolução da Comunicação de Alto Valor" class="hero-bonus mt-7" href="#leva">
+<span class="hb-tag">+ 2<br/>bônus</span>
+<span class="hb-list"><span>Diagnóstico de Autoridade Comunicativa</span><span>Mapa de Evolução da Comunicação de Alto Valor</span></span>
+</a>
+<div aria-label="Carol Almeida em números" class="stats mt-8" role="list">
+<div role="listitem"><b>20+</b><span>anos de experiência</span></div>
+<div role="listitem"><b>4.500+</b><span>alunos</span></div>
+<div role="listitem"><b>8</b><span>países</span></div>
+</div>
+</div>
+<figure class="hero-photo w-full max-w-[26rem] mx-auto lg:mr-0 lg:-mt-2" data-scene="" style="--scene: 0.154; --scene-in: 0.368;">
+<div class="ph">
+<img alt="Carol Almeida sorrindo, de braços cruzados, com blazer preto e conjunto risca de giz" fetchpriority="high" height="1568" loading="eager" src="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/a2/a22512dac53800f21df907ec50b45fcb3b7c98956eac8033985d6f09f45f9ea4-39472726ef.jpg" width="1045"/>
+</div>
+<figcaption>Carol Almeida</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<!-- 2 · A DOR: quem já sabe a teoria e mesmo assim não é percebido -->
+<section aria-labelledby="dor-titulo" class="on-paper py-20 lg:py-28" id="dor">
+<div class="wrap">
+<p class="kicker">Isso acontece com você?</p>
+<h2 class="h2 mt-5 max-w-[24ch]" id="dor-titulo">Você entrega um trabalho excelente. Mas, na hora de mostrar isso, <em>alguma coisa se perde.</em></h2>
+<div class="mt-10 h-px bg-[rgba(10,34,40,.14)]"></div>
+<div class="mt-10 grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+<div>
+<p class="body-ink">Você já entendeu que comunicação é importante. Talvez já tenha feito curso, assistido a aulas e salvado dezenas de posts sobre oratória. A teoria, você conhece.</p>
+<p class="body-ink">Mas aí chega a reunião com aquele cliente. Alguém pergunta <em>“e você, faz o quê?”</em>. Você precisa gravar um vídeo ou dizer o seu preço. E o que sai é uma lista de formações, uma fala que não prende — e, do outro lado, um <em>“tem desconto?”</em>.</p>
+</div>
+<ul aria-label="Sinais de que a sua comunicação esconde o seu valor" class="pains">
+<li data-scene="" style="--scene: 0.000; --scene-in: 0.000;"><svg aria-hidden="true" fill="none" height="20" stroke="#cf5a45" stroke-linecap="round" stroke-width="2.4" viewbox="0 0 24 24" width="20"><path d="M5 5l14 14M19 5L5 19" pathlength="1"></path></svg>Você sabe muito mais do que o mercado reconhece.</li>
+<li data-scene="" style="--scene: 0.000; --scene-in: 0.000;"><svg aria-hidden="true" fill="none" height="20" stroke="#cf5a45" stroke-linecap="round" stroke-width="2.4" viewbox="0 0 24 24" width="20"><path d="M5 5l14 14M19 5L5 19" pathlength="1"></path></svg>Você se apresenta pelo título, não pelo valor que entrega.</li>
+<li data-scene="" style="--scene: 0.000; --scene-in: 0.000;"><svg aria-hidden="true" fill="none" height="20" stroke="#cf5a45" stroke-linecap="round" stroke-width="2.4" viewbox="0 0 24 24" width="20"><path d="M5 5l14 14M19 5L5 19" pathlength="1"></path></svg>A conversa com o cliente vai direto para o preço.</li>
+<li data-scene="" style="--scene: 0.000; --scene-in: 0.000;"><svg aria-hidden="true" fill="none" height="20" stroke="#cf5a45" stroke-linecap="round" stroke-width="2.4" viewbox="0 0 24 24" width="20"><path d="M5 5l14 14M19 5L5 19" pathlength="1"></path></svg>Você publica, mas a sua experiência não aparece.</li>
+<li data-scene="" style="--scene: 0.000; --scene-in: 0.000;"><svg aria-hidden="true" fill="none" height="20" stroke="#cf5a45" stroke-linecap="round" stroke-width="2.4" viewbox="0 0 24 24" width="20"><path d="M5 5l14 14M19 5L5 19" pathlength="1"></path></svg>Elogiam a sua fala, mas raramente isso vira oportunidade.</li>
+</ul>
+</div>
+<div class="mt-16 lg:mt-24 max-w-[46rem]">
+<h3 class="h-turn">
+<span class="scrub" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">O problema não é falta de competência.</span>
+<span class="scrub" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">É que ninguém te mostrou</span>
+<span class="scrub" data-scene="" style="--scene: 0.000; --scene-in: 0.000;"><em>onde a sua comunicação está escondendo o seu valor.</em></span>
+</h3>
+<a class="cta mt-9 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero enxergar onde eu travo
+        <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+</div>
+</section>
+<!-- 3 · O MEIO: o Raio-X -->
+<section aria-labelledby="xr-titulo" class="xr pt-20 lg:pt-28 pb-6" id="raio-x">
+<div class="wrap">
+<p class="kicker">O caminho · Raio-X da comunicação</p>
+<h2 class="h2 mt-5 max-w-[22ch]" id="xr-titulo">Antes de mudar o que você fala, é preciso <em>enxergar o que está por baixo.</em></h2>
+<p class="lead mt-6 max-w-[42rem]">A Sala Secreta é um Raio-X da sua comunicação, conduzido ao vivo pela Carol. Com o Diagnóstico de Autoridade Comunicativa, ele olha para cinco pontos — e mostra onde a sua competência deixa de ser percebida.</p>
+</div>
+</section>
+<!-- 4 · O QUE VOCÊ LEVA: o encontro e os 2 bônus, logo depois do Raio-X -->
+<section aria-labelledby="leva-titulo" class="leva pt-10 pb-20 lg:pt-14 lg:pb-28" id="leva">
+<div class="wrap">
+<p class="kicker">O que você leva</p>
+<h2 class="h2 mt-5 max-w-[24ch]" id="leva-titulo">Um encontro ao vivo com a Carol <em>e dois bônus para enxergar a sua comunicação.</em></h2>
+<div class="mt-12">
+<article aria-labelledby="leva-1" class="item" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<span aria-hidden="true" class="num">01</span>
+<div>
+<p class="kicker" style="letter-spacing:.2em">Encontro ao vivo</p>
+<h3 class="mt-3" id="leva-1">Sala Secreta · Raio-X do Profissional de Alto Valor</h3>
+<p>Online e ao vivo com a Carol, no domingo, 29/11, às 9h (horário de Brasília). Seu diferencial, narrativa e pitch, autoridade no digital, conexão, expressividade e persuasão consciente.</p>
+</div>
+<div aria-hidden="true" class="art">
+<svg class="h-full w-auto" viewbox="0 0 180 120">
+<rect class="draw" fill="none" height="86" pathlength="1" rx="6" stroke="#4dc4c7" stroke-width="2" width="160" x="10" y="10"></rect>
+<path class="draw" d="M60 112h60M90 96v16" fill="none" pathlength="1" stroke="#94dbdd" stroke-linecap="round" stroke-width="2"></path>
+<path class="dot-in" d="M80 38l26 15-26 15z" fill="#4dc4c7"></path>
+<circle class="dot-in" cx="150" cy="24" fill="#cf5a45" r="4.5"></circle>
+<text class="dot-in" fill="#94dbdd" font-family="Public Sans,sans-serif" font-size="9" font-weight="800" letter-spacing="1.5" text-anchor="end" x="140" y="27">AO VIVO</text>
+</svg>
+</div>
+</article>
+<article aria-labelledby="leva-2" class="item is-bonus" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<span aria-hidden="true" class="num">02</span>
+<div>
+<span class="pill">Bônus 1 · incluso</span>
+<p class="kicker mt-4" style="letter-spacing:.2em">Para olhar para a sua comunicação</p>
+<h3 class="mt-3" id="leva-2">Diagnóstico de Autoridade Comunicativa</h3>
+<p>Para você olhar com clareza para a forma como comunica a sua competência hoje.</p>
+</div>
+<div aria-hidden="true" class="art">
+<svg class="h-full w-auto" viewbox="0 0 140 130">
+<polygon fill="none" points="70,8 132,52 108,122 32,122 8,52" stroke="rgba(148,219,221,.3)" stroke-width="1"></polygon>
+<polygon fill="none" points="70,40 101,62 89,98 51,98 39,62" stroke="rgba(148,219,221,.18)" stroke-width="1"></polygon>
+<path d="M70 70L70 8M70 70L132 52M70 70L108 122M70 70L32 122M70 70L8 52" stroke="rgba(148,219,221,.18)" stroke-width="1"></path>
+<polygon class="dot-in" fill="rgba(77,196,199,.22)" points="70,26 112,58 96,110 46,104 26,60"></polygon>
+<polygon class="draw" fill="none" pathlength="1" points="70,26 112,58 96,110 46,104 26,60" stroke="#4dc4c7" stroke-linejoin="round" stroke-width="2.2"></polygon>
+<circle class="dot-in" cx="26" cy="60" fill="#94dbdd" r="5"></circle>
+</svg>
+</div>
+</article>
+<article aria-labelledby="leva-3" class="item is-bonus" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<span aria-hidden="true" class="num">03</span>
+<div>
+<span class="pill">Bônus 2 · incluso</span>
+<p class="kicker mt-4" style="letter-spacing:.2em">Para pensar no próximo passo</p>
+<h3 class="mt-3" id="leva-3">Mapa de Evolução da Comunicação de Alto Valor</h3>
+<p>Para você enxergar os pontos que deseja desenvolver e por onde seguir depois do encontro.</p>
+</div>
+<div aria-hidden="true" class="art">
+<svg class="h-full w-auto" viewbox="0 0 200 120">
+<path d="M12 104C34 104 44 76 64 76S90 88 108 88s30-40 50-40 22-30 32-30" fill="none" stroke="rgba(148,219,221,.16)" stroke-linecap="round" stroke-width="9"></path>
+<path class="draw" d="M12 104C34 104 44 76 64 76S90 88 108 88s30-40 50-40 22-30 32-30" fill="none" pathlength="1" stroke="#4dc4c7" stroke-linecap="round" stroke-width="2.4"></path>
+<g class="dot-in"><circle cx="12" cy="104" fill="#94dbdd" r="6"></circle><circle cx="64" cy="76" fill="#0a3a44" r="6" stroke="#4dc4c7" stroke-width="1.6"></circle><circle cx="108" cy="88" fill="#0a3a44" r="6" stroke="#4dc4c7" stroke-width="1.6"></circle><circle cx="158" cy="48" fill="#0a3a44" r="6" stroke="#4dc4c7" stroke-width="1.6"></circle><circle cx="190" cy="18" fill="#0a3a44" r="6" stroke="#4dc4c7" stroke-width="1.6"></circle></g>
+</svg>
+</div>
+</article>
+</div>
+<div class="mt-12">
+<a class="cta w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero o Raio-X + os 2 bônus
+        <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note">Tudo por R$ 29,90 · domingo, 29/11, às 9h · online e ao vivo.</p>
+</div>
+</div>
+</section>
+<!-- 5 · VOZES NO MUNDO: mensagens reais de quem aprendeu com a Carol -->
+<section aria-labelledby="vozes-titulo" class="on-paper vozes py-20 lg:py-28" id="vozes">
+<div class="wrap">
+<p class="kicker">Mensagens que chegam para a Carol</p>
+<h2 class="h2 mt-5 max-w-[25ch]" id="vozes-titulo">Na TV, no palco, ao lado de grandes nomes. <em>Vozes que foram lapidadas e hoje estão no mundo.</em></h2>
+<p class="body-ink mt-6 max-w-[42rem]">Não é promessa. São mensagens reais de quem aprendeu com a Carol e parou de esperar se sentir 100% pronta para ser vista.</p>
+<ol aria-label="Mensagens de alunas" class="vz-grid list-none p-0 m-0 mt-12 lg:mt-16">
+<li class="vz" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<button aria-label="Ampliar a mensagem: na TV" class="vz-shot" data-zoom="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/01/012584624f8cf38a3deb3c6d5366e3e0e0bd69bea43ef3bb50d3b52c3e07bfe1-c819166cd2.png" type="button">
+<img alt="Print: aluna dando entrevista na TV, no quadro “Na ponta do lápis: finanças para casais”, e a mensagem “Diamond colocando a voz no mundo! Obrigada, @Carol Almeida!”" decoding="async" height="1350" loading="eager" src="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/01/012584624f8cf38a3deb3c6d5366e3e0e0bd69bea43ef3bb50d3b52c3e07bfe1-c819166cd2.png" width="1080"/>
+<span aria-hidden="true" class="vz-zoom"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"></path></svg></span>
+</button>
+<p class="vz-where">01 · Na TV</p>
+<p class="vz-quote">“Diamond colocando a voz no mundo!”</p>
+<p class="vz-ctx">Da Imersão Comunicador Diamond para uma entrevista na televisão.</p>
+</li>
+<li class="vz" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<button aria-label="Ampliar a mensagem: no palco" class="vz-shot" data-zoom="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/55/55e67c2d48b6ea6d08d56cead49e965093b5a495943276df7d5ee696c779e29b-7f2fc62021.png" type="button">
+<img alt="Print: aluna palestrando num palco e a mensagem encaminhada em que conta que fez a primeira palestra para 100 pessoas e que os anos de mentoria com a Carol trouxeram segurança" decoding="async" height="1350" loading="eager" src="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/55/55e67c2d48b6ea6d08d56cead49e965093b5a495943276df7d5ee696c779e29b-7f2fc62021.png" width="1080"/>
+<span aria-hidden="true" class="vz-zoom"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"></path></svg></span>
+</button>
+<p class="vz-where">02 · No palco</p>
+<p class="vz-quote">“Fiz minha primeira palestra para 100 pessoas.”</p>
+<p class="vz-ctx">Um convite inesperado. Ela não se sentia 100% preparada, mas os anos de mentoria com a Carol trouxeram a segurança para dizer sim.</p>
+</li>
+<li class="vz" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<button aria-label="Ampliar a mensagem: ao lado de grandes nomes" class="vz-shot" data-zoom="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/78/78f5bfbac322d5328c05859d88b1870fe8101dd5e0e17e9e9e45cebad8e488c1-ff25f4ad04.png" type="button">
+<img alt="Print: mesa de palestrantes no Instituto Federal do Pará, em evento da AEST-PA, e a mensagem “Ontem e hoje estive palestrando ao lado de profissionais renomados nacional e internacionalmente”" decoding="async" height="1350" loading="eager" src="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/78/78f5bfbac322d5328c05859d88b1870fe8101dd5e0e17e9e9e45cebad8e488c1-ff25f4ad04.png" width="1080"/>
+<span aria-hidden="true" class="vz-zoom"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"></path></svg></span>
+</button>
+<p class="vz-where">03 · Ao lado de grandes nomes</p>
+<p class="vz-quote">“Estive palestrando ao lado de profissionais renomados.”</p>
+<p class="vz-ctx">Dois dias entre o conhecimento técnico e as câmeras.</p>
+</li>
+</ol>
+<p class="vz-hint">Toque ou clique num print para ampliar</p>
+<div class="mt-14 lg:mt-20 max-w-[46rem]">
+<p class="h-turn" style="text-wrap:balance">A próxima voz no mundo <em>pode ser a sua.</em></p>
+<a class="cta mt-8 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero colocar a minha voz no mundo
+        <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note">R$ 29,90 · domingo, 29/11, às 9h · online e ao vivo · com 2 bônus.</p>
+</div>
+</div>
+<dialog aria-label="Mensagem ampliada" class="zoom" id="zoom">
+<img alt="" id="zoom-img" src="data:,"/>
+<button aria-label="Fechar" class="zoom-x" type="button"><svg aria-hidden="true" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-width="2.4" viewbox="0 0 24 24" width="18"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</dialog>
+</section>
+<!-- 4 · A TRANSFORMAÇÃO: de → para -->
+<section aria-labelledby="tf-titulo" class="tf-pin on-paper" data-scene="pin" id="transformacao" style="--scene: 0.000; --scene-in: 0.000;">
+<div class="tf-stage">
+<div class="wrap">
+<div class="flex flex-wrap items-end justify-between gap-4">
+<div>
+<p class="kicker">A transformação</p>
+<h2 class="h2 mt-4 max-w-[22ch]" id="tf-titulo">De profissional competente a profissional <em>percebido como AUTORIDADE.</em></h2>
+</div>
+<p class="hidden md:block text-sm font-semibold text-[#56686b] m-0">5 viradas · <span class="tf-count">role para ver</span></p>
+</div>
+<p aria-hidden="true" class="tf-hint">Arraste para o lado · 5 viradas <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24" width="16"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></p>
+</div>
+<div class="mt-8 lg:mt-10">
+<ol aria-label="Viradas na sua comunicação" class="tf-track list-none m-0">
+<li class="tf-card">
+<span aria-hidden="true" class="tf-n">01</span>
+<p class="tf-lbl mt-4 text-[#9a5a4e]">De</p>
+<p class="tf-de">Se apresentar pelo título: “sou formada em…, tenho pós em…”.</p>
+<p aria-hidden="true" class="tf-arrow"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></p>
+<p class="tf-lbl text-[var(--tealdk)]">Para</p>
+<p class="tf-para">Se apresentar pelo valor: quem você ajuda e que diferença você faz.</p>
+</li>
+<li class="tf-card">
+<span aria-hidden="true" class="tf-n">02</span>
+<p class="tf-lbl mt-4 text-[#9a5a4e]">De</p>
+<p class="tf-de">A conversa ir direto para o preço.</p>
+<p aria-hidden="true" class="tf-arrow"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></p>
+<p class="tf-lbl text-[var(--tealdk)]">Para</p>
+<p class="tf-para">O cliente perceber o seu diferencial antes de perguntar quanto custa.</p>
+</li>
+<li class="tf-card">
+<span aria-hidden="true" class="tf-n">03</span>
+<p class="tf-lbl mt-4 text-[#9a5a4e]">De</p>
+<p class="tf-de">Travar quando perguntam “o que você faz?”.</p>
+<p aria-hidden="true" class="tf-arrow"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></p>
+<p class="tf-lbl text-[var(--tealdk)]">Para</p>
+<p class="tf-para">Uma apresentação com narrativa e pitch, que desperta interesse.</p>
+</li>
+<li class="tf-card">
+<span aria-hidden="true" class="tf-n">04</span>
+<p class="tf-lbl mt-4 text-[#9a5a4e]">De</p>
+<p class="tf-de">Publicar e a sua experiência não aparecer.</p>
+<p aria-hidden="true" class="tf-arrow"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></p>
+<p class="tf-lbl text-[var(--tealdk)]">Para</p>
+<p class="tf-para">Um digital que mostra a autoridade que você já construiu.</p>
+</li>
+<li class="tf-card">
+<span aria-hidden="true" class="tf-n">05</span>
+<p class="tf-lbl mt-4 text-[#9a5a4e]">De</p>
+<p class="tf-de">Receber elogios e nada acontecer depois.</p>
+<p aria-hidden="true" class="tf-arrow"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></p>
+<p class="tf-lbl text-[var(--tealdk)]">Para</p>
+<p class="tf-para">Conexão, expressividade e persuasão consciente — sem pressionar ninguém.</p>
+</li>
+</ol>
+</div>
+<div class="wrap">
+<div aria-hidden="true" class="tf-progress"><span style="--sw: 0.200;"></span></div>
+</div>
+</div>
+</section>
+<section aria-label="Convite" class="on-paper pb-20 lg:pb-28 pt-4">
+<div class="wrap" data-reveal="" style="opacity: 1; transform: none; transition: opacity 0.6s, transform 0.6s;">
+<p class="h-turn max-w-[30ch]">É para essa virada que a Sala Secreta existe. <em>Ela começa quando você enxerga a própria comunicação.</em></p>
+<a class="cta mt-9 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero começar a minha virada
+      <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note">R$ 29,90 · domingo, 29/11, às 9h · online e ao vivo.</p>
+</div>
+</section>
+<!-- 6 · QUEM CONDUZ -->
+<section aria-labelledby="carol-titulo" class="on-paper py-20 lg:py-28 border-t border-[rgba(10,34,40,.12)]" id="carol">
+<div class="wrap grid lg:grid-cols-[.9fr_1.1fr] gap-14 lg:gap-20 items-center">
+<figure class="carol-photo w-full" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<div class="ph">
+<img alt="Carol Almeida de blazer de tweed, sentada numa cadeira transparente, com o queixo apoiado nas mãos" height="1499" loading="eager" src="assets/files.benvox.ai/benvox-v3/8dbe5ca3-8070-4c30-ad25-d1b0fc354151/47/4748932dde4ba3073828a773b146e93aeac20706f66012e7c0e1cad7cb9a1638-7b20faefff.jpg" width="1000"/>
+</div>
+</figure>
+<div>
+<p class="kicker">Quem conduz o seu Raio-X</p>
+<h2 class="h2 mt-5" id="carol-titulo" style="font-size:clamp(2.4rem,5vw,4rem)">Carol Almeida</h2>
+<p class="body-ink mt-6">Fonoaudióloga, mestre em Comunicação (mente, corpo e emoção) e especialista em comportamento humano, PNL e Neurossemântica. Meta-Coach e trainer internacional, membro da International Society of Neuro-Semantics e coautora de dois livros.</p>
+<p class="body-ink">Há mais de 20 anos, ajuda profissionais a transformar COMPETÊNCIA em AUTORIDADE percebida através da comunicação. São mais de 4.500 alunos em 8 países.</p>
+<ul aria-label="Formação" class="creds mt-7 p-0">
+<li>Fonoaudióloga</li><li>Mestre em Comunicação</li><li>PNL e Neurossemântica</li><li>Meta-Coach</li><li>Coautora de 2 livros</li>
+</ul>
+<p class="quote mt-9">“Nem toda voz nasce brilhando, mas toda voz pode ser lapidada.”</p>
+<a class="cta mt-10 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero aprender com a Carol
+        <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+</div>
+</section>
+<!-- 7 · A OFERTA -->
+<section aria-labelledby="oferta-titulo" class="offer py-20 lg:py-28" data-scene="" id="inscricao" style="--scene: 0.000; --scene-in: 0.000;">
+<div class="wrap">
+<p class="kicker">Inscrição</p>
+<h2 class="h2 mt-5 max-w-[22ch]" id="oferta-titulo">Tudo isso por menos do que custa <em>o próximo desconto que você der.</em></h2>
+<div class="ticket mt-12" data-scene="" style="--scene: 0.000; --scene-in: 0.000;">
+<div class="t-left">
+<p class="t-lbl">Você leva</p>
+<ul class="checks">
+<li><svg aria-hidden="true" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24" width="18"><path d="m5 12 5 5 9-10"></path></svg><span><strong>Sala Secreta · Raio-X do Profissional de Alto Valor</strong><br/><span class="text-white/70 text-sm">encontro online e ao vivo com a Carol</span></span></li>
+<li><svg aria-hidden="true" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24" width="18"><path d="m5 12 5 5 9-10"></path></svg><span><strong>Diagnóstico de Autoridade Comunicativa</strong><br/><span class="text-white/70 text-sm">bônus 1 · incluso</span></span></li>
+<li><svg aria-hidden="true" fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24" width="18"><path d="m5 12 5 5 9-10"></path></svg><span><strong>Mapa de Evolução da Comunicação de Alto Valor</strong><br/><span class="text-white/70 text-sm">bônus 2 · incluso</span></span></li>
+</ul>
+<div class="meta">
+<span><svg aria-hidden="true" fill="none" height="16" stroke="#4dc4c7" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><rect height="16" rx="2" width="18" x="3" y="5"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Domingo, 29/11/2026</span>
+<span><svg aria-hidden="true" fill="none" height="16" stroke="#4dc4c7" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>9h · Brasília</span>
+<span><svg aria-hidden="true" fill="none" height="16" stroke="#4dc4c7" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><rect height="12" rx="2" width="18" x="3" y="4"></rect><path d="M8 20h8M12 16v4"></path></svg>Online e ao vivo</span>
+</div>
+</div>
+<div class="t-right">
+<span aria-hidden="true" class="notch n1"></span><span aria-hidden="true" class="notch n2"></span>
+<p class="t-lbl">Hoje você paga</p>
+<p class="price"><small>R$</small>29,90</p>
+<a class="cta mt-7 w-full" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero fazer meu Raio-X
+          <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note">Pagamento pela Eduzz. Após a inscrição, você recebe as orientações para participar.</p>
+<div id="relogio">
+<p class="t-lbl mt-6" style="color:rgba(238,247,247,.6)">O encontro começa em</p>
+<div aria-live="off" class="clock">
+<div><b data-c="d">09</b><span>dias</span></div>
+<div><b data-c="h">12</b><span>horas</span></div>
+<div><b data-c="m">17</b><span>min</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 8 · DÚVIDAS -->
+<section aria-labelledby="duvidas-titulo" class="on-paper py-20 lg:py-28" id="duvidas">
+<div class="wrap max-w-[52rem]" data-reveal="" style="opacity: 1; transform: none; transition: opacity 0.6s 60ms, transform 0.6s 60ms;">
+<p class="kicker">Antes de entrar</p>
+<h2 class="h2 mt-5" id="duvidas-titulo">Perguntas que todo mundo faz</h2>
+<div class="faq mt-10">
+<details open=""><summary>Quando e onde acontece?<svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="m6 9 6 6 6-6"></path></svg></summary><p class="ans">Domingo, <strong>29 de novembro de 2026, às 9h</strong> (horário de Brasília). O encontro é <strong>online e ao vivo</strong>.</p></details>
+<details><summary>O que está incluído nos R$ 29,90?<svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="m6 9 6 6 6-6"></path></svg></summary><p class="ans">O encontro Sala Secreta · Raio-X do Profissional de Alto Valor, o Diagnóstico de Autoridade Comunicativa e o Mapa de Evolução da Comunicação de Alto Valor.</p></details>
+<details><summary>Eu já sei que comunicação é importante. É para mim?<svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="m6 9 6 6 6-6"></path></svg></summary><p class="ans">É exatamente para você. A Sala Secreta não existe para convencer ninguém de que comunicação importa: é para profissionais liberais, empreendedores e líderes que já sabem disso e querem enxergar onde a própria comunicação está escondendo o seu valor.</p></details>
+<details><summary>Como recebo as orientações para participar?<svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="m6 9 6 6 6-6"></path></svg></summary><p class="ans">Depois da inscrição, você recebe as orientações para participar do encontro.</p></details>
+<details><summary>É o mesmo que o grupo gratuito da Sala Secreta?<svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="m6 9 6 6 6-6"></path></svg></summary><p class="ans">Não. Este é um <strong>encontro pago</strong>, com o Diagnóstico e o Mapa incluídos. Estar no grupo gratuito não substitui a inscrição.</p></details>
+<details><summary>Tenho outra dúvida. Com quem falo?<svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="m6 9 6 6 6-6"></path></svg></summary><div class="ans"><p class="m-0">Fale com a nossa equipe pelo chat desta página.</p><button class="ghost mt-4" data-chat="Olá! Tenho uma dúvida sobre a Sala Secreta · Raio-X do Profissional de Alto Valor." type="button">Falar com a equipe</button></div></details>
+</div>
+<a class="cta mt-10 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Tirei minhas dúvidas, quero entrar
+      <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note">R$ 29,90 · domingo, 29/11, às 9h · online e ao vivo.</p>
+</div>
+</section>
+<!-- 9 · FECHAMENTO -->
+<section aria-labelledby="final-titulo" class="final py-24 lg:py-36" data-scene="" id="final" style="--scene: 0.000; --scene-in: 0.000;">
+<div aria-hidden="true" class="final-glow"></div>
+<div class="wrap relative max-w-[60rem]">
+<h2 class="h2" id="final-titulo" style="font-size:clamp(2.1rem,4.6vw,3.9rem)">Na próxima vez que perguntarem <em>“o que você faz?”</em>, a sua resposta pode mostrar o seu valor.</h2>
+<p class="lead mt-7 max-w-[40rem]">Você pode continuar torcendo para que percebam sozinhos, ou fazer o Raio-X e enxergar o que mudar. A diferença cabe numa manhã de domingo e em R$ 29,90.</p>
+<a class="cta mt-10 w-full sm:w-auto" data-checkout="" href="https://chk.eduzz.com/D0R8GDKB9Y">Quero fazer meu Raio-X
+      <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="20"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<p class="cta-note">Domingo, 29/11, às 9h (Brasília) · online e ao vivo · R$ 29,90</p>
+<p class="serif text-2xl mt-10 text-[var(--soft)]">Vamos juntos <svg aria-hidden="true" class="inline-block align-middle ml-1" fill="none" height="24" viewbox="0 0 24 28" width="21"><path d="M10 5L12.5 12.5 20 15 12.5 17.5 10 25 7.5 17.5 0 15 7.5 12.5 10 5Z" fill="currentColor"></path><path d="M20 0L21 3 24 4 21 5 20 8 19 5 16 4 19 3 20 0Z" fill="currentColor"></path></svg></p>
+</div>
+</section>
+</main>
+<footer class="bg-[#020f13] border-t border-white/10">
+<div class="wrap py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+<div class="flex items-center gap-3">
+<img alt="Carol Almeida" class="h-10 w-auto max-w-[150px] object-contain" data-logo="" src="assets/app.benvox.ai/v3/public/site/carol_almeida_26d075/logo-57529ef286.png" style="display: block;"/>
+<span class="flex items-center gap-3" data-logo-fallback="" style="display: none;"><span aria-hidden="true" class="mono">CA</span><span class="brand-name">Carol Almeida<small>Comunicação de Alto impacto.</small></span></span>
+</div>
+<div class="flex flex-col sm:items-end gap-2 text-sm text-white/60">
+<a class="font-semibold text-white/80 hover:text-white" href="https://www.instagram.com/carolalmeida.oficial/" rel="noopener" target="_blank">@carolalmeida.oficial</a>
+<p class="m-0">Sala Secreta · Raio-X do Profissional de Alto Valor</p>
+</div>
+</div>
+<div class="wrap pb-24 sm:pb-10"><p class="text-xs leading-relaxed text-white/50 pr-16 sm:pr-0 m-0">Esta página usa cookies e o Pixel do Meta para medir as visitas e melhorar os nossos anúncios.</p></div>
+</footer>
+<script>
+(function(){
+  // Checkout da Eduzz: leva as etiquetas do anúncio (utm_* e fbclid) junto.
+  var CHECKOUT_URL = 'https://chk.eduzz.com/D0R8GDKB9Y';
+  var KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid'];
+  var tracked = {};
+  try { tracked = JSON.parse(sessionStorage.getItem('raiox_utm') || '{}') || {}; } catch (e) { tracked = {}; }
+  try {
+    var qs = new URLSearchParams(window.location.search);
+    KEYS.forEach(function(k){ var v = qs.get(k); if (v) tracked[k] = v; });
+    sessionStorage.setItem('raiox_utm', JSON.stringify(tracked));
+  } catch (e) {}
+  var href = CHECKOUT_URL;
+  try { var u = new URL(CHECKOUT_URL); Object.keys(tracked).forEach(function(k){ u.searchParams.set(k, tracked[k]); }); href = u.toString(); } catch (e) {}
+  document.querySelectorAll('[data-checkout]').forEach(function(a){
+    a.href = href;
+    a.addEventListener('click', function(ev){
+      if (typeof window.fbq !== 'function') return;
+      try { window.fbq('trackCustom', 'CliqueInscricao', { content_name: 'Sala Secreta · Raio-X', value: 29.90, currency: 'BRL' }); } catch (e) { return; }
+      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || a.target === '_blank') return;
+      ev.preventDefault();
+      var go = a.href;
+      setTimeout(function(){ window.location.href = go; }, 300);
+    });
+  });
+
+  // Logo da marca, quando houver
+  try {
+    var logo = window.BenvoxSite && BenvoxSite.logoUrl && BenvoxSite.logoUrl();
+    if (logo) {
+      document.querySelectorAll('[data-logo]').forEach(function(img){ img.src = logo; img.style.display = 'block'; });
+      document.querySelectorAll('[data-logo-fallback]').forEach(function(el){ el.style.display = 'none'; });
+    }
+  } catch (e) {}
+
+  // Botões de conversa
+  document.querySelectorAll('[data-chat]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var text = b.getAttribute('data-chat');
+      if (window.BenvoxChat && typeof BenvoxChat.open === 'function') { BenvoxChat.open(text); return; }
+      try {
+        var url = (window.BenvoxSite && BenvoxSite.whatsappUrl && BenvoxSite.whatsappUrl(text)) || (window.BenvoxSite && BenvoxSite.chatUrl && BenvoxSite.chatUrl());
+        if (url) window.open(url, '_blank', 'noopener');
+      } catch (e) {}
+    });
+  });
+
+  // Contagem até o encontro: domingo, 29/11/2026, 9h em Brasília
+  var START = new Date('2026-11-29T09:00:00-03:00').getTime();
+  var topo = document.getElementById('falta-topo');
+  var relogio = document.getElementById('relogio');
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function tick(){
+    var diff = START - Date.now();
+    if (diff <= 0) { if (relogio) relogio.hidden = true; if (topo) topo.textContent = ''; return false; }
+    var d = Math.floor(diff / 86400000), h = Math.floor(diff % 86400000 / 3600000), m = Math.floor(diff % 3600000 / 60000);
+    if (topo) topo.textContent = d >= 1 ? ' · faltam ' + d + (d === 1 ? ' dia' : ' dias') : ' · é hoje';
+    if (relogio) {
+      relogio.hidden = false;
+      relogio.querySelector('[data-c="d"]').textContent = pad(d);
+      relogio.querySelector('[data-c="h"]').textContent = pad(h);
+      relogio.querySelector('[data-c="m"]').textContent = pad(m);
+    }
+    return true;
+  }
+  if (tick()) setInterval(tick, 30000);
+
+  // Celular: barra de progresso acompanha o deslize dos cartões da transformação
+  var tfTrack = document.querySelector('.tf-track');
+  var tfBar = document.querySelector('.tf-progress span');
+  if (tfTrack && tfBar) {
+    var tfBusy = false;
+    var tfUpd = function(){
+      tfBusy = false;
+      var max = tfTrack.scrollWidth - tfTrack.clientWidth;
+      if (max > 0) tfBar.style.setProperty('--sw', (.2 + .8 * Math.min(1, tfTrack.scrollLeft / max)).toFixed(3));
+    };
+    tfTrack.addEventListener('scroll', function(){ if (!tfBusy) { tfBusy = true; requestAnimationFrame(tfUpd); } }, { passive: true });
+    window.addEventListener('resize', tfUpd);
+    tfUpd();
+  }
+
+  // Prints das alunas: tocar para ampliar
+  var zoom = document.getElementById('zoom');
+  var zoomImg = document.getElementById('zoom-img');
+  document.querySelectorAll('[data-zoom]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var src = b.getAttribute('data-zoom');
+      var shot = b.querySelector('img');
+      if (zoom && zoomImg && typeof zoom.showModal === 'function') {
+        zoomImg.src = src; zoomImg.alt = shot ? shot.alt : '';
+        zoom.showModal();
+      } else { window.open(src, '_blank', 'noopener'); }
+    });
+  });
+  if (zoom) zoom.addEventListener('click', function(){ zoom.close(); });
+
+  // Cabeçalho fixo: aparece depois da abertura
+  var head = document.getElementById('bar-head');
+  var hero = document.getElementById('inicio');
+  var ticking = false;
+  function onScroll(){
+    ticking = false;
+    var limit = hero ? hero.offsetTop + hero.offsetHeight * .7 : 600;
+    head.classList.toggle('show', (window.scrollY || window.pageYOffset) > limit);
+  }
+  window.addEventListener('scroll', function(){ if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+</script>
+<script data-chat="chat-do-site-2b5538" data-color="#4dc4c7" data-position="right" data-origin="https://app.benvox.ai" defer="" src="assets/app.benvox.ai/widget-872d71ade5.js"></script>
+<div id="benvox-widget-root" style="position: fixed; bottom: 20px; right: 20px; z-index: 2147483000; font-family: inherit;"><div aria-label="Fale conosco" role="dialog" style="position: absolute; bottom: 72px; right: 0px; width: min(400px, -40px + 100vw); height: min(640px, -120px + 100vh); border-radius: 16px; box-sizing: border-box; background: transparent; overflow: hidden; box-shadow: rgba(0, 0, 0, 0.18) 0px 12px 48px; border: 1px solid rgba(0, 0, 0, 0.06); transform-origin: right bottom; transition: opacity 0.18s, transform 0.18s; display: none; opacity: 0; transform: scale(0.96);"></div><button aria-expanded="false" aria-label="Fale conosco" style="width: 56px; height: 56px; border-radius: 50%; border: 0px; cursor: pointer; background: rgb(77, 196, 199); color: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.22) 0px 6px 20px; display: flex; align-items: center; justify-content: center; padding: 0px; transition: transform 0.15s;" type="button"><svg aria-hidden="true" fill="none" height="26" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="26"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button></div></body></html>
